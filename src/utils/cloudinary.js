@@ -12,20 +12,23 @@ import fs from 'fs';
     
     // Upload an image file
     const uploadOnCloudinary = async (localFilePath) => {
-       try{
-              if(!localFilePath) return null
-              //upload the file path
-               await cloudinary.uploader.upload(localFilePath,
-                {
-                    resource_type: 'auto',
-                }
-               )
-               console.log('File uploaded to Cloudinary successfully',response.url);
-               return response
-       }
-       catch(error){
-        fs.unlinkSync(localFilePath)
-        return null
+       if(!localFilePath) return null;
+       let response = null;
+       try {
+           response = await cloudinary.uploader.upload(localFilePath, {
+               resource_type: 'auto',
+           });
+           console.log('File uploaded to Cloudinary successfully', response.url);
+           return response;
+       } catch (error) {
+           console.error('Cloudinary upload failed:', error);
+           return null;
+       } finally {
+           try {
+               fs.rmSync(localFilePath, { force: true });
+           } catch (unlinkError) {
+               console.error('Failed to remove temp file:', unlinkError);
+           }
        }
     }
  export {uploadOnCloudinary};
